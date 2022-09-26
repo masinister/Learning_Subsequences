@@ -4,6 +4,7 @@ from block_matrix import S, shattered
 import matplotlib.pyplot as plt
 import string
 
+
 if __name__ == '__main__':
 
     n = 4
