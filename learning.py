@@ -9,6 +9,7 @@ import os
 def train(model, trainloader, testloader, device, epochs):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters())
+    acc = []
 
     for epoch in range(epochs):
         model.train()
@@ -37,9 +38,9 @@ def train(model, trainloader, testloader, device, epochs):
             bar.set_description('Epoch %d, loss: %.3f, acc: %.3f'%(epoch + 1, running_loss, correct/total))
 
         correct, total = test(model, testloader, device)
+        acc += [correct/total]
         print("Validation: %d/%d=%.2f Accuracy."%(correct, total, correct/total))
-
-    return model
+    return model, acc
 
 def test(model, dataloader, device):
     correct = 0

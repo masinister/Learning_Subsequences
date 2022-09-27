@@ -11,8 +11,8 @@ class PlantedSubsequenceDataset(Dataset):
         self.n = n
         self.max_gap = g
         self.subsequence = seq
-        self.planted = torch.tensor(planted_set(n, 1000, g, seq), dtype = torch.float, device = self.device)
-        self.non_planted = torch.tensor(non_planted_set(n, 1000, seq), dtype = torch.float, device = self.device)
+        self.planted = torch.tensor(planted_set(n, 10000, g, seq), dtype = torch.float, device = self.device)
+        self.non_planted = torch.tensor(non_planted_set(n, 10000, seq), dtype = torch.float, device = self.device)
 
     def __getitem__(self, index):
         y = index % 2
