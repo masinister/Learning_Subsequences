@@ -3,38 +3,46 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
+from tqdm import tqdm
 
-def is_subseq(x, y):
-    it = iter(y)
-    return all(c in it for c in x)
+def is_bounded_diff_seq(S, g):
+    return all(abs(j-i) <= g + 1 for i,j in zip(S,S[1:]))
 
-def bounded_diff_indices(n, k, g):
-    assert n > k * (g + 1)
-    indices = [0]
-    while len(indices) < k:
-        indices.append(indices[-1] + random.randint(1, g + 1))
-    return np.array(indices) + random.randint(0, n - indices[-1] - 1)
+def contains_k_ones(x, k, g = 0):
+    I = np.where(x == 1)[0]
+    return any(is_bounded_diff_seq(S, g) for S in zip(*[I[i:] for i in range(k)]))
 
-def random_bin_sequence(n, planted = None, g = 0):
-    seq = np.random.choice([0, 1], size=(n,))
-    if planted is not None:
-        mask = bounded_diff_indices(n, len(planted), g)
-        seq[mask] = planted
+def random_bin_sequence(n):
+    return np.random.choice([0, 1], size=(n,))
+
+def random_planted_sequence(n, k, g = 0):
+    seq = random_bin_sequence(n)
+    while not contains_k_ones(seq, k, g):
+        i = np.random.choice(np.where(seq == 0)[0], size = 2)
+        seq[i] = 1
     return seq
 
-def planted_set(n, m, g, seq):
+def random_nonplanted_sequence(n, k, g = 0):
+    seq = random_bin_sequence(n)
+    while contains_k_ones(seq, k, g):
+        i = np.random.choice(np.where(seq == 1)[0], size = 2)
+        seq[i] = 0
+    return seq
+
+def planted_set(m, n, k, g):
     S = []
-    while len(S) < m:
-        s = random_bin_sequence(n, seq, g)
+    print("Generating planted set")
+    for i in tqdm(range(m)):
+        s = random_planted_sequence(n, k, g)
         S.append(s)
     return np.vstack(S)
 
-def non_planted_set(n, m, seq):
+def non_planted_set(m, n, k, g):
     S = []
-    while len(S) < m:
-        s = random_bin_sequence(n)
-        if not is_subseq(s, seq):
-            S.append(s)
+    print("Generating non-planted set")
+    for i in tqdm(range(m)):
+        s = random_nonplanted_sequence(n, k, g)
+        S.append(s)
     return np.vstack(S)
 
 def train_test_split(dataset, test_split, batch_size):
@@ -53,7 +61,8 @@ def train_test_split(dataset, test_split, batch_size):
     return trainloader, testloader
 
 if __name__ == '__main__':
-    planted = random_bin_sequence(5)
-    # print(random_bin_sequence(32, planted, 2))
-    print(planted_set(16, 5, 2, planted))
-    print(non_planted_set(16, 5, planted))
+    # planted = random_bin_sequence(10)
+    # print(planted)
+    # print(contains_k_ones(planted, 3, 1))
+    print(planted_set(5, 100, 5, 1))
+    print(non_planted_set(5, 100, 5, 1))

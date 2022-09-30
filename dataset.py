@@ -5,14 +5,15 @@ from utils import planted_set, non_planted_set, random_bin_sequence
 
 class PlantedSubsequenceDataset(Dataset):
 
-    def __init__(self, n, g, seq, device = torch.device("cuda")):
+    def __init__(self, m, n, k, g, device = torch.device("cuda")):
         super(PlantedSubsequenceDataset, self).__init__()
         self.device = device
+        self.m = m
         self.n = n
+        self.k = k
         self.max_gap = g
-        self.subsequence = seq
-        self.planted = torch.tensor(planted_set(n, 10000, g, seq), dtype = torch.float, device = self.device)
-        self.non_planted = torch.tensor(non_planted_set(n, 10000, seq), dtype = torch.float, device = self.device)
+        self.planted = torch.tensor(planted_set(m, n, k, g), dtype = torch.float, device = self.device)
+        self.non_planted = torch.tensor(non_planted_set(m, n, k, g), dtype = torch.float, device = self.device)
 
     def __getitem__(self, index):
         y = index % 2
@@ -27,7 +28,8 @@ class PlantedSubsequenceDataset(Dataset):
         return len(self.planted) + len(self.non_planted)
 
 if __name__ == '__main__':
-    dataset = PlantedSubsequenceDataset(20, 0, random_bin_sequence(10))
+    dataset = PlantedSubsequenceDataset(10, 20, 5, 0)
+    print(len(dataset))
     X, y = dataset[0]
     print(X, y)
     X, y = dataset[1]
