@@ -5,8 +5,12 @@ from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from tqdm import tqdm
 
+def is_subseq(x, y):
+    it = iter(y)
+    return all(c in it for c in x)
+
 def is_bounded_diff_seq(S, g):
-    return all(abs(j-i) <= g + 1 for i,j in zip(S,S[1:]))
+    return all(abs(j - i) <= g + 1 for i,j in zip(S,S[1:]))
 
 def contains_k_ones(x, k, g = 0):
     I = np.where(x == 1)[0]
@@ -17,16 +21,20 @@ def random_bin_sequence(n):
 
 def random_planted_sequence(n, k, g = 0):
     seq = random_bin_sequence(n)
+    P = 1
     while not contains_k_ones(seq, k, g):
-        i = np.random.choice(np.where(seq == 0)[0], size = 2)
+        i = np.random.choice(np.where(seq == 0)[0], size = P)
         seq[i] = 1
+        P = P + 1
     return seq
 
 def random_nonplanted_sequence(n, k, g = 0):
     seq = random_bin_sequence(n)
+    P = 1
     while contains_k_ones(seq, k, g):
-        i = np.random.choice(np.where(seq == 1)[0], size = 2)
+        i = np.random.choice(np.where(seq == 1)[0], size = P)
         seq[i] = 0
+        P = P + 1
     return seq
 
 def planted_set(m, n, k, g):
@@ -61,8 +69,5 @@ def train_test_split(dataset, test_split, batch_size):
     return trainloader, testloader
 
 if __name__ == '__main__':
-    # planted = random_bin_sequence(10)
-    # print(planted)
-    # print(contains_k_ones(planted, 3, 1))
-    print(planted_set(5, 100, 5, 1))
-    print(non_planted_set(5, 100, 5, 1))
+    print(planted_set(5, 10, 5, 0))
+    print(non_planted_set(5, 10, 5, 2))
