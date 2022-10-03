@@ -10,9 +10,11 @@ class FC_NN(nn.Module):
         super(FC_NN, self).__init__()
         self.n = n
 
-        self.fc = nn.Sequential(nn.Linear(self.n, self.n),
+        self.fc = nn.Sequential(nn.Linear(self.n, 1024),
                                 nn.ReLU(),
-                                nn.Linear(self.n, 2))
+                                nn.Linear(1024, 1024),
+                                nn.ReLU(),
+                                nn.Linear(1024, 2))
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -28,19 +30,15 @@ class Conv_NN(nn.Module):
         super(Conv_NN, self).__init__()
         self.n = n
 
-        self.conv = nn.Sequential(nn.Conv1d(1, 2, k),
+        self.conv = nn.Sequential(nn.Conv1d(1, 4, int(k/2)),
                                   nn.ReLU(),
-                                  # nn.Conv1d(256, 128, int(k/2)),
-                                  # nn.ReLU(),
-                                  # nn.Conv1d(128, 64, int(k/3)),
-                                  # nn.ReLU(),
-                                  # nn.Conv1d(64, 1, int(k/4)),
-                                  # nn.ReLU(),
                                   )
 
         self.fc_size = np.prod(self.conv(torch.zeros((1,1,n))).shape[1:])
 
-        self.fc = nn.Sequential(nn.Linear(self.fc_size, 2),
+        self.fc = nn.Sequential(nn.Linear(self.fc_size, 1024),
+                                nn.ReLU(),
+                                nn.Linear(1024, 2)
                                 )
 
     def forward(self, x):

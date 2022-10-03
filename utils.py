@@ -16,25 +16,28 @@ def contains_k_ones(x, k, g = 0):
     I = np.where(x == 1)[0]
     return any(is_bounded_diff_seq(S, g) for S in zip(*[I[i:] for i in range(k)]))
 
-def random_bin_sequence(n):
-    return np.random.choice([0, 1], size=(n,))
+def random_bin_sequence(n, p1 = 0.5):
+    return np.random.choice([0, 1], size=(n,), p = [1-p1, p1])
 
 def random_planted_sequence(n, k, g = 0):
     seq = random_bin_sequence(n)
-    P = 1
     while not contains_k_ones(seq, k, g):
-        i = np.random.choice(np.where(seq == 0)[0], size = P)
-        seq[i] = 1
-        P = P + 1
+        i = np.random.randint(n)
+        for j in range(k):
+            c = np.random.randint(g + 1)
+            if i + j*(c+1) >= n:
+                break
+            seq[i + j*(c+1)] = 1
     return seq
 
 def random_nonplanted_sequence(n, k, g = 0):
     seq = random_bin_sequence(n)
-    P = 1
     while contains_k_ones(seq, k, g):
-        i = np.random.choice(np.where(seq == 1)[0], size = P)
-        seq[i] = 0
-        P = P + 1
+        I = np.where(seq == 1)[0]
+        for i in range(len(I) - k):
+            if contains_k_ones(seq[I[i]:I[i+k]+1], k, g):
+                j = np.random.randint(k)
+                seq[I[i+j]] = 0
     return seq
 
 def planted_set(m, n, k, g):
@@ -69,5 +72,5 @@ def train_test_split(dataset, test_split, batch_size):
     return trainloader, testloader
 
 if __name__ == '__main__':
-    print(planted_set(5, 10, 5, 0))
-    print(non_planted_set(5, 10, 5, 2))
+    print(np.mean(planted_set(50, 100, 5, 0)))
+    print(np.mean(non_planted_set(50, 100, 5, 0)))

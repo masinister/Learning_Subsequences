@@ -13,13 +13,14 @@ from learning import train, test
 from utils import train_test_split, random_bin_sequence
 
 device = torch.device("cuda")
-m = 2048
-n = 256
-k = int(n / 16)
+m = 4096
+n = 512
+k = int(n / 4)
 # g = 4
+print(n,k)
 
-batch_size = 8
-num_epochs = 16
+batch_size = 16
+num_epochs = 8
 
 fc_model = FC_NN(n).to(device)
 conv_model = Conv_NN(n, k).to(device)
@@ -57,9 +58,9 @@ for g in range(8):
     # plt.plot(fc_acc,  label='FC_NN')
     # plt.legend()
     # plt.show()
-plt.figure(0)
-plt.title("Accuracy")
-plt.xlabel("Maximum planted subsequence gap")
+plt.figure(1)
+plt.title("Fully Connected vs. Convolutional for n={}, k={}".format(n,k))
+plt.xlabel("Planted Gap Upper Bound")
 plt.ylabel("Validation Accuracy")
 plt.plot(conv_accs,  label='Conv_NN')
 plt.plot(fc_accs,  label='FC_NN')
